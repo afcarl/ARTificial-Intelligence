@@ -1,0 +1,5 @@
+catalogToMovementArtistMap["antonio carnicero y mancio"] = "antonio carnicero"
+catalogToMovementArtistMap["bastiano mainardi"] = "sebastiano mainardi"
+catalogToMovementArtistMap["helen galloway mcnicoll"] = "helen mcnicoll"
+catalogToMovementArtistMap["lorenzo the elder costa"] = "lorenzo costa"
+catalogToMovementArtistMap["simon pietersz. verelst"] = "simon verelst"
