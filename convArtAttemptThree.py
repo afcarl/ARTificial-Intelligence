@@ -1,25 +1,5 @@
-"""This tutorial introduces the LeNet5 neural network architecture
-using Theano.  LeNet5 is a convolutional neural network, good for
-classifying images. This tutorial shows how to build the architecture,
-and comes with all the hyper-parameters you need to reproduce the
-paper's MNIST results.
-
-
-This implementation simplifies the model in the following ways:
-
- - LeNetConvPool doesn't implement location-specific gain and bias parameters
- - LeNetConvPool doesn't implement pooling by average, it implements pooling
-   by max.
- - Digit classification is implemented with a logistic regression rather than
-   an RBF network
- - LeNet5 was not fully-connected convolutions at second layer
-
-References:
- - Y. LeCun, L. Bottou, Y. Bengio and P. Haffner:
-   Gradient-Based Learning Applied to Document
-   Recognition, Proceedings of the IEEE, 86(11):2278-2324, November 1998.
-   http://yann.lecun.com/exdb/publis/pdf/lecun-98.pdf
-
+"""
+This code is modified from the tutorial found at http://deeplearning.net/tutorial/lenet.html.
 """
 import cPickle
 import sys
@@ -165,7 +145,7 @@ def shared_dataset(data_xy, borrow=True):
 
 test_set_x, test_set_y = shared_dataset(test_set)
 valid_set_x, valid_set_y = shared_dataset(valid_set)
-train_set_x, train_set_y = shared_dataset(train_set)
+train_set_x, train_set_y = shared_dataset(tr100ain_set)
 
 # compute number of minibatches for training, validation and testing
 n_train_batches = train_set_x.get_value(borrow=True).shape[0]
