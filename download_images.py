@@ -7,6 +7,10 @@ import urllib3
 from lxml import html
 
 ART_DIR = "art_images/"
+f = open("ART_DIR", "w")
+f.write(ART_DIR)
+f.close()
+
 distinct_image_names = set()
 
 
@@ -55,7 +59,7 @@ def main():
     os.makedirs(ART_DIR, exist_ok = True)
     reader = csv.DictReader(open("catalog.csv", encoding = "iso-8859-1"), delimiter = ";")
     writer_fieldnames = reader.fieldnames + ["IMAGE"]
-    writer = csv.DictWriter(open("catalog_with_images.csv", "w", encoding = "iso-8859-1"),
+    writer = csv.DictWriter(open("catalog_final.csv", "w", encoding = "utf-8"),
                             fieldnames = writer_fieldnames, delimiter = ";")
     writer.writeheader()
 

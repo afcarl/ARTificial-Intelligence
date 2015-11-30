@@ -24,7 +24,7 @@ def make_visual(layer_weights):
     min_scale = layer_weights.min(axis = -1).min(axis = -1)[...,
                                                         np.newaxis, np.newaxis]
     return (255 * (layer_weights - min_scale) /
-            (max_scale - min_scale)).astype('uint8')
+            (max_scale - min_scale)).astype("uint8")
 
 
 def main():
