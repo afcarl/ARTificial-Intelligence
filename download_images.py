@@ -5,18 +5,18 @@ import os
 import urllib3
 
 from lxml import html
+from os import listdir
+from os.path import isfile, join
 
 ART_DIR = "art_images/"
-f = open("ART_DIR", "w")
+f = open("ART_DIR.txt", "w")
 f.write(ART_DIR)
 f.close()
 
-distinct_image_names = set()
+bad_urls = open("bad_urls.txt", "w")
 
 
-def download_image(url):
-    global distinct_image_names
-    
+def download_image(url, image_name):
     doc = None
     fail = True
     while fail:
@@ -32,31 +32,30 @@ def download_image(url):
         if attribute == "href" and elem.tag == "a" and link.endswith(".jpg"):
             image_url = link
 
-    (base_image_name, ext) = image_url.split("/")[-1].split(".")
-    image_name_count = 0
-    image_name = "{0}_{1}.{2}".format(base_image_name, image_name_count, ext)
-    # Need to check for duplicate image names.
-    while image_name in distinct_image_names:
-        image_name_count += 1
-        image_name = base_image_name + str(image_name_count)
+    if image_url == "":
+        print("Bad URL.")
+        bad_urls.write(url + "\n")
+        return False
 
     timeout = True
-    while timeout is True:
+    while timeout:
         try:
             http = urllib3.PoolManager()
             image_src = http.urlopen("GET", "http://www.wga.hu" + image_url, timeout = 5)
             output = open(ART_DIR + image_name, "wb")
             output.write(image_src.data)
             output.close()
-            timeout = False
-            distinct_image_names.add(image_name)
-            return image_name
+            return True
         except urllib3.exceptions.ConnectTimeoutError:
             print("timeout")
 
 
 def main():
     os.makedirs(ART_DIR, exist_ok = True)
+    art_images = [f for f in listdir(ART_DIR) if isfile(join(ART_DIR, f))]
+    already_downloaded = {art_image for art_image in art_images}
+    distinct_names = set()
+
     reader = csv.DictReader(open("catalog.csv", encoding = "iso-8859-1"), delimiter = ";")
     writer_fieldnames = reader.fieldnames + ["IMAGE"]
     writer = csv.DictWriter(open("catalog_final.csv", "w", encoding = "utf-8"),
@@ -68,9 +67,23 @@ def main():
             continue
         url = row["URL"]
         print(url)
-        title = row["TITLE"]
-        row["IMAGE"] = download_image(url)
-        writer.writerow(row)
+
+        base_image_name = url.split("/")[-1].replace(".html", "")
+        image_name_count = 0
+        image_name = "{0}_{1}.jpg".format(base_image_name, image_name_count)
+        # Need to check for duplicate image names.
+        while image_name in distinct_names:
+            image_name_count += 1
+            image_name = "{0}_{1}.jpg".format(base_image_name, image_name_count)
+
+        # Also need to check for images that have already been downloaded.
+        if image_name in already_downloaded or download_image(url, image_name):
+            row["IMAGE"] = image_name
+            writer.writerow(row)
+            already_downloaded.add(image_name)
+            distinct_names.add(image_name)
+
+    bad_urls.close()
 
 
 if __name__ == "__main__":

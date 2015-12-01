@@ -8,7 +8,7 @@ import random
 from PIL import Image
 
 
-ART_DIR = open("ART_DIR").read().strip()
+ART_DIR = open("ART_DIR.txt").read().strip()
 TOP_ARTISTS = 100
 TOP_MOVEMENTS = 14
 
