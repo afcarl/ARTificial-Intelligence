@@ -4,7 +4,7 @@
 This code is modified from the tutorial found at http://deeplearning.net/tutorial/lenet.html.
 """
 import numpy as np
-import pickle
+import cPickle
 import sys
 import theano
 import theano.tensor as T
@@ -109,9 +109,11 @@ batch_size = 500
 
 rng = np.random.RandomState(23455)
 
-train_set = pickle.load(open("train_set.numpy"))
-valid_set = pickle.load(open("valid_set.numpy"))
-test_set = pickle.load(open("test_set.numpy"))
+which_data = sys.argv[1]
+
+train_set = cPickle.load(open("train_set_{0}.numpy".format(which_data)))
+valid_set = cPickle.load(open("valid_set_{0}.numpy".format(which_data)))
+test_set = cPickle.load(open("test_set_{0}.numpy".format(which_data)))
 
 
 def shared_dataset(data_xy, borrow = True):
@@ -385,5 +387,5 @@ baseline = float(counts[0][1]) / float(len(test_labels))
 
 weights = layer0.W.get_value(borrow = True).T
 biases = layer0.b.get_value(borrow = True).T
-np.save("weights", weights)
-np.save("biases", biases)
+np.save("weights_{0}".format(which_data), weights)
+np.save("biases_{0}".format(which_data), biases)

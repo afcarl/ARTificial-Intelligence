@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 """
 See http://sklearn-theano.github.io/auto_examples/plot_overfeat_layer1_filters.html.
@@ -13,9 +13,9 @@ are similar to other filters used in computer vision, such as Gabor filters.
 
 """
 
-import pickle
 import numpy as np
 import matplotlib.pyplot as plt
+import sys
 
 
 def make_visual(layer_weights):
@@ -28,7 +28,9 @@ def make_visual(layer_weights):
 
 
 def main():
-    layer_weights = np.load("movement_weights_arch1.numpy")
+    which_data = sys.argv[1]
+    
+    layer_weights = np.load("weights_{0}.numpy".format(which_data))
     layer_weights = layer_weights.transpose(3, 2, 1, 0)
     
     lw_shape = layer_weights.shape
@@ -44,4 +46,4 @@ def main():
     mosaic = lw
     plt.imshow(mosaic, interpolation = "nearest")
     plt.show()
-    plt.savefig("filters_movements_C1.png")
+    plt.savefig("filters_{0}.png".format(which_data))

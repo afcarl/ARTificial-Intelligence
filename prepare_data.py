@@ -13,20 +13,20 @@ TOP_ARTISTS = 100
 TOP_MOVEMENTS = 14
 
 
-def dump_counts(column, n = TOP_ARTISTS):
+def get_top_counts(column, n = TOP_ARTISTS):
     if column != "artist":
         n = TOP_MOVEMENTS
-
+    
     capitalized_column = column.upper()
     counts = {}
     reader = csv.DictReader(open("{0}s_data.csv".format(column)), delimiter = ";")
     for row in reader:
         value = row[capitalized_column]
         counts[value] = counts.get(value, 0) + 1
-
+    
     counts = list(counts.items())
     counts.sort(key = lambda item_count: item_count[1], reverse = True)
-
+    
     top_counts = {item[0] for item in counts[:n]}
     return top_counts
 
@@ -34,12 +34,12 @@ def dump_counts(column, n = TOP_ARTISTS):
 def scale_down_by_width(base_width, base_height, img):
     
     (width, height) = img.size
-    wpercent = (base_width / float(width))
-    hsize = int((float(height) * float(wpercent)))
+    wpercent = (base_width / width)
+    hsize = int(height * wpercent)
     img = img.resize((base_width, hsize), Image.ANTIALIAS)
     
     (new_width, new_height) = img.size
-    shave = (new_height - base_height) / 2
+    shave = (new_height - base_height) // 2
     if (new_height - base_height) % 2 == 1:
         img = img.crop((0, shave, new_width, new_height - (shave + 1)))
     else:
@@ -50,12 +50,12 @@ def scale_down_by_width(base_width, base_height, img):
 def scale_down_by_height(base_width, base_height, img):
     
     (width, height) = img.size
-    hpercent = (base_height / float(height))
-    wsize = int((float(width) * float(hpercent)))
+    hpercent = (base_height / height)
+    wsize = int(width * hpercent)
     img = img.resize((wsize, base_height), Image.ANTIALIAS)
     
     (new_width, new_height) = img.size
-    shave = (new_width - base_width) / 2
+    shave = (new_width - base_width) // 2
     if (new_width - base_width) % 2 == 1:
         img = img.crop((shave, 0, new_width - (shave + 1), new_height))
     else:
@@ -74,7 +74,7 @@ def get_raw_data(column):
     capitalized_column = column.upper()
     reader = csv.DictReader(open("{0}s_data.csv".format(column)), delimiter = ";")
     raw_data = []
-    top_counts = dump_counts(column)
+    top_counts = get_top_counts(column)
     
     for row in reader:
         value = row[capitalized_column]
@@ -99,37 +99,37 @@ def get_raw_data(column):
 
 def get_data_and_labels(raw_data, min_width, min_height, value_to_int = {},
                         value_int = 0, training = False):
-
+    
     data = []
     labels = []
-
+    
     for (i, sample) in enumerate(raw_data):
-
+        
         if i % 1000 == 0:
             print(i)
-
+        
         value = sample[0]
         img = sample[1]
-
+        
         if training and value not in value_to_int:
             value_to_int[value] = value_int
             value_int += 1
-
+        
         if not training and value not in value_to_int:
             raise ValueError("Unseen value: {0}".format(value))
-
+        
         value_int = value_to_int[value]
-
+        
         im = Image.open(ART_DIR + img)
         (width, height) = im.size
         if height > width:
             im = scale_down_by_width(min_width, min_height, im)
         else:
             im = scale_down_by_height(min_width, min_height, im)
-
+        
         (width, height) = im.size
-
-        img = np.asarray(im, dtype = "float64") / 256.
+        
+        img = np.asarray(im, dtype = "float64") / 256
         # Put image in 4D tensor of shape (1, 3, height, width).
         try:
             img_ = img.swapaxes(0, 2).swapaxes(1, 2)
@@ -138,7 +138,7 @@ def get_data_and_labels(raw_data, min_width, min_height, value_to_int = {},
         except:
             # Probably grayscale.
             print(sample[1])
-
+    
     data = np.array(data)
     labels = np.array(labels)
     data_and_labels = (data, labels)
@@ -171,16 +171,16 @@ def prepare_data_sets(raw_data, column):
     
     (train_set, value_to_int) = get_data_and_labels(train_data, min_width,
                                                     min_height, training = True)
-    pickle.dump(value_to_int, open("{0}_to_int.pydict".format(column), "w"))
-    pickle.dump(train_set, open("train_set_{0}.numpy".format(column), "w"))
+    pickle.dump(value_to_int, open("{0}_to_int.pydict".format(column), "wb"))
+    pickle.dump(train_set, open("train_set_{0}.numpy".format(column), "wb"))
     
     valid_set = get_data_and_labels(valid_data, min_width, min_height,
                                     value_to_int)
-    pickle.dump(valid_set, open("valid_set_{0}.numpy".format(column), "w"))
+    pickle.dump(valid_set, open("valid_set_{0}.numpy".format(column), "wb"))
     
     test_set = get_data_and_labels(test_data, min_width, min_height,
                                    value_to_int)
-    pickle.dump(test_set, open("test_set_{0}.numpy".format(column), "w"))
+    pickle.dump(test_set, open("test_set_{0}.numpy".format(column), "wb"))
     
     all_labels = train_set[1].tolist() + valid_set[1].tolist() + test_set[1].tolist()
     counts = {}
@@ -188,9 +188,9 @@ def prepare_data_sets(raw_data, column):
         counts[label] = counts.get(label, 0) + 1
     
     counts = list(counts.items())
-    counts.sort(key = lambda artist: artist[1], reverse = True)
+    counts.sort(key = lambda item: item[1], reverse = True)
     
-    baseline = float(counts[0][1]) / float(len(all_labels))
+    baseline = counts[0][1] / len(all_labels)
     print(baseline)
 
 

@@ -14,7 +14,7 @@ def map_artists_to_movement(link, movement):
     url = "http://www.artcyclopedia.com" + link
     r = requests.get(url)
     html = r.text
-    soup = BeautifulSoup(html)
+    soup = BeautifulSoup(html, "lxml")
     
     tables = soup.findChildren("table", cellpadding = 10)
     
@@ -35,13 +35,13 @@ def map_artists_to_movement(link, movement):
 
 def main():
     movement_links = open("Links to Movements")
-
+    
     for line in movement_links:
         line = line.strip()
         [link, movement] = line.split("\t")
         map_artists_to_movement(link, movement)
-
-    pickle.dump(artist_to_movement, open("artist_to_movement.pydict", "w"))
+    
+    pickle.dump(artist_to_movement, open("artist_to_movement.pydict", "wb"))
 
 
 if __name__ == "__main__":
