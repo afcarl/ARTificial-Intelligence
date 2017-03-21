@@ -1,6 +1,7 @@
 #!/usr/bin/env python2
 
 import numpy as np
+import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import sys
 
@@ -19,8 +20,7 @@ def main():
         row = i // cols
         col = i % cols
         ax = plt.subplot(gs[row, col])
-        plt.axis("off")
-        plt.imshow(layer_weights[i].T, interpolation = "nearest")
+        nothing = plt.axis("off")
+        nothing = plt.imshow(layer_weights[i].T, interpolation = "nearest")
 
-    plt.show()
     plt.savefig("filters_{0}.png".format(which_data))
